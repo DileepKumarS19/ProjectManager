@@ -35,7 +35,7 @@ router.post("/login", async (req, res) => {
 
         const {success, data} = loginSchema.safeParse(req.body);
         if (!success) {
-            return res.status(400).json({ message: data.errors });
+            return res.status(400).json({ message: "Invalid credentials" });
         }
         const { email, password } = data;
         const user = await UserModel.findOne({ email });
@@ -63,6 +63,15 @@ router.get("/me", protect, async (req, res) => {
         const user = await UserModel.findById(req.user.id).select("-password");
         if (!user) return res.status(404).json({ message: "User not found" });
         res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+router.get("/users", protect, async (req, res) => {
+    try {
+        const users = await UserModel.find().select("-password");
+        res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

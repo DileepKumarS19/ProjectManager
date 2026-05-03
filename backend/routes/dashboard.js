@@ -22,7 +22,10 @@ router.get('/:projectId', async (req, res) => {
     ]),
     Task.aggregate([
       { $match: { project: new mongoose.Types.ObjectId(projectId) } },
-      { $group: { _id: '$assignedTo', count: { $sum: 1 } } }
+      { $group: { _id: '$assignedTo', count: { $sum: 1 } } },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'userDetails' } },
+      { $unwind: { path: '$userDetails', preserveNullAndEmptyArrays: true } },
+      { $project: { count: 1, 'userDetails.name': 1 } }
     ]),
     Task.countDocuments({
       project: projectId,
